@@ -1,21 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
 const { User, validate } = require('../models/user');
 const _ = require('lodash');
 const bcrypt = require('bcrypt');
 const auth = require('../middleware/auth');
-const asyncMiddleware = require('../middleware/async');
+const validate_middleware = require('../middleware/validate');
 
-router.get('/me', auth, asyncMiddleware(async function(req, res){
+
+router.get('/me', auth, async function(req, res){
     const user = await User.findById(req.user._id).select('-password');
     res.send(user);
-}));
+});
 
-router.post('/', asyncMiddleware(async function(req, res){
-    const { error } = validate(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
-
+router.post('/', validate_middleware(validate), async function(req, res){
     let user = await User.findOne({ email: req.body.email });
     if (user) return res.status(400).send("User already registered.");
 
@@ -30,6 +27,6 @@ router.post('/', asyncMiddleware(async function(req, res){
 
     //header para retornar token e o usuário já ficar logado quando criar conta
     res.header('x-auth-token', token).send(_.pick(user, ['_id', 'name', 'email']));
-}));
+});
 
 module.exports = router;

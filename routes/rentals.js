@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const asyncMiddleware = require('../middleware/async');
 const Fawn = require('fawn');
 const { Rental, validate } = require('../models/rental');
 const { Movie } = require('../models/movie');
@@ -10,22 +9,22 @@ const { Customer } = require('../models/customer');
 
 Fawn.init(mongoose);
 
-router.get('/', asyncMiddleware(async function(req, res) {
+router.get('/', async function(req, res) {
     const rentals = await Rental
         .find()
         .sort('-dateOut');
 
     res.send(rentals);
-}));
+});
 
-router.get('/:id', asyncMiddleware(async function(req, res){
+router.get('/:id', async function(req, res){
     const rental = await Rental.findById(req.params.id);
     if (!rental) return res.status(404).send('The rental with the given ID was not found.');
 
     res.send(rental);
-}));
+});
 
-router.post('/', auth, asyncMiddleware(async function(req, res) {
+router.post('/', auth, async function(req, res) {
     const { error } = validate(req.body);
     if(error) return res.status(400).send(error.details[0].message);
 
@@ -58,6 +57,6 @@ router.post('/', auth, asyncMiddleware(async function(req, res) {
         .run();
 
     res.send(rental);
-}));
+});
 
 module.exports = router;
