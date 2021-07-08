@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const home = require('../routes/home');
 const genres = require('../routes/genres');
 const customers = require('../routes/customers');
@@ -11,6 +12,7 @@ const error = require('../middleware/error');
 
 module.exports = function(app) {
     app.use(express.json());
+    app.use(cors());
     app.use('/', home);
     app.use('/api/genres', genres);
     app.use('/api/customers', customers);
